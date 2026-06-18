@@ -2,51 +2,26 @@
 
 {%block title%}Home Page{%endblock%}
 
-{%block navbarContents%}
-    {%if loggedIn%}
-        <li class="nav-item">
-            <a class="nav-link" href="#">Dashboard</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Profile</a>
-        </li>
-        <div class="d-flex align-items-center">
-            <a href="#" class="btn btn-trekkle-cta mx-2 px-4"  role="button">Logout</a>
-        </div>
-        <span class="navbar-text">
-            Logged in as {{username}}!!
-        </span>
-    {%else%}
-        <div class="d-flex align-items-center">
-                <a href="#" class="btn btn-trekkle-cta mx-2 my-2 "  role="button">Login</a>
-        </div>
-        <div class="d-flex align-items-center">
-                <a href="#" class="btn btn-trekkle-cta mx-2 my-2" role="button">Signup</a>
-        </div>
-    {%endif%}
-{%endblock%}
+
 
 
 {%block content%}
-<div class="container p-0">
-    <!-- For small screens make it full size for large screens make it side by side -->
-    
-    <div class="row align-items-center">
-        <div class="col col-sm-12 col-md-12 col-lg-6 min-vh-100 justify-content-center p-0">
-        <!-- Insert Trekker image here-->
-            <img src="../static/images/trek_image.png" class="img-fluid w-100 h-100 object-fit-cover ms-0" alt="Trekker Image">
-    
-        <!--  -->
-        <!-- <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-60"></div> -->
+<div class="container-fluid p-0">
+    <div class="row g-0 align-items-center">
+        <div class="col-12 col-md-6 vh-50 vh-lg-100 p-0">
+            <img src="../static/images/trek_image.png" class="img-fluid w-100 h-100 object-fit-cover" alt="Trekker Image">
         </div>
 
-
-        <div class="col col-sm-12 col-md-12 col-lg-6  d-flex flex-column justify-content-center align-items-center text-center vh-100 bg-trekkle-accent">
-            <h1 class="content align-items-center">Discover the beyond!!</h1>
-            <a href="/login" class="btn btn-trekkle-primary btn-lg" role="button"> Login</a>
-
+        <div class="col-12 col-md-6 d-flex flex-column justify-content-center align-items-center text-center vh-50 vh-lg-100 bg-trekkle-accent p-4">
+            <h1 class="content mb-4">Discover the beyond!!</h1>
+            {% if user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-trekkle-primary btn-lg" role="button">Go to dashboard</a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-trekkle-primary btn-lg" role="button">Sign Up</a>
+            {% endif %}
         </div>
     </div>
+</div>
 
     <div class="row align-items-center">
 

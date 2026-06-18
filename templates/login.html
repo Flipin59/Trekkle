@@ -1,0 +1,25 @@
+{%extends "base.html"%}
+{%block title%} Login{%endblock%}
+{%block content%}
+
+<h2 class="fw-semibold  mb-4 px-3 text-center" >
+        A journey ahead?
+    </h2>
+ <div class="col  d-flex flex-column justify-content-center align-items-center text-center bg-trekkle-accent border border-white border-5 rounded-3 p-4 mx-2 my-2">
+        <h3 class="text-center mb-4 fw-bold text-dark">Login to your Account</h3>
+        <form class="row g-3 px-4 mt-2" method="post">
+            <div class="col-sm-12 col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="col-12 my-2">
+                <button type="submit" class="btn btn-trekkle-primary btn-lg">Submit</button>
+            </div>
+        </form>
+ </div>
+
+{%endblock%}

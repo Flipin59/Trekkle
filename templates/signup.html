@@ -1,0 +1,44 @@
+{%extends "base.html"%}
+{%block title%} Sign Up{%endblock%}
+{%block content%}
+
+<h2 class="fw-semibold  mb-4 px-3 text-center" >
+        Your next breathtaking journey begins here!
+    </h2>
+ <div class="col  d-flex flex-column justify-content-center align-items-center text-center bg-trekkle-accent border border-white border-5 rounded-3 p-4 mx-2 my-2">
+        <h3 class="text-center mb-4 fw-bold text-dark">Create Your Account</h3>
+        <form class="row g-3 px-4 mt-2" method="post">
+            <div class="col-sm-12 col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="col-12">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="john.doe@example.com" required>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="John Doe">
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <label for="phone" class="form-label">Phone </label>
+                <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" title="Please enter a 10-digit phone number" placeholder="9876543210">
+            </div>
+            <div class="col-12">
+                <input type="radio" class="btn-check " name="role" id="Trekker" value="Trekker" autocomplete="off" checked>
+                <label class="btn btn-outline-dark mx-2" for="Trekker">Trekker</label>
+
+                <input type="radio" class="btn-check" name="role" id="Staff" value="Staff" autocomplete="off">
+                <label class="btn btn-outline-dark mx-2" for="Staff">Staff</label>  
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-trekkle-primary btn-lg">Submit</button>
+            </div>
+        </form>
+ </div>
+ 
+{%endblock%}
