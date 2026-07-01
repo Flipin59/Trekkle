@@ -1,0 +1,259 @@
+{%extends "base.html"%}
+{%block title%} Staff Page{%endblock%}
+
+{%block subnav%}
+<div class="navbar navbar-expand-lg navbar-dark navbar-trekkle shadow-lg sticky-top">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white fw-bold ">Navigate dashboard:</span>
+            <a href="#treks-section" class="nav-link text-white fw-semibold px-3 py-1">
+                Manage Treks
+            </a>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-2 text-trekkle-primary" id="treks-section">Manage Upcomming Treks</h1>
+    <p class="text mb-4">See the treks assigned to you</p>
+    <!----------------------------SEARCH BAR ROW ---------------------------------->
+    <!-- Same Search Bar as admins -->
+    <div class="row g-3 mb-4 align-items-end">
+        <!-- Search by ID -->
+        <div class="col-12 col-md-4">
+            <form method="GET" action="{{ url_for('staff_bp.staff_dashboard') }}" class="d-flex gap-2"
+                id="form_search_id">
+                <input type="number" name="search_id" class="form-control" placeholder="Trek ID" value="{{ search_id }}"
+                    min="1">
+                <button type="submit" class="btn btn-trekkle-primary text-nowrap">Search ID</button>
+            </form>
+        </div>
+        <!-- Search by Name -->
+        <div class="col-12 col-md-5">
+            <form method="GET" action="{{ url_for('staff_bp.staff_dashboard') }}" class="d-flex gap-2"
+                id="form_search_name">
+                <input type="text" name="search_name" class="form-control" placeholder="Trek name"
+                    value="{{ search_name }}">
+                <button type="submit" class="btn btn-trekkle-primary text-nowrap">Search Name</button>
+            </form>
+        </div>
+        <!-- Reset -->
+        <div class="col-12 col-md-3 text-md-end">
+            <a href="{{ url_for('staff_bp.staff_dashboard') }}" class="btn btn-outline-secondary w-100"
+                id="btn_reset_search">
+                Reset / Show All
+            </a>
+        </div>
+    </div>
+
+    <!---------------------------- TREK TABLE ----------------->
+    <div style="max-height: 420px; overflow-y: auto;"> <!--Limits the height of the table-->
+        <table class="table table-hover table-striped align-middle mb-0" id="treks_table">
+        <thead class="table-dark">
+                <tr>
+                    <th style="width:60px">ID</th>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th style="width:80px" class="text-center">Details/Edit</th>
+                    <th style="width:80px" class="text-center">View Registered Users</th>
+
+                </tr>
+        </thead>
+        <tbody>
+                {% if treks %}
+                {% for trek in treks %}
+                <tr>
+                    <td>{{ trek.id }}</td>
+                    <td>{{ trek.name }}</td>
+                    <td>{{ trek.location}}</td>
+                    <td>{{ trek.start_date}}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-trekkle-cta" data-bs-toggle="modal"
+                            data-bs-target="#editModal{{ trek.id }}" title="Edit trek">
+                            Details/Edit
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-trekkle-cta" data-bs-toggle="modal"
+                            data-bs-target="#viewUsersModal{{ trek.id }}" title="View Registered Users">
+                            View Users
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No treks found.</td>
+                </tr>
+                {% endif %}
+        </tbody>
+        </table>
+    </div>
+
+
+
+
+
+
+
+
+    <!--========================== MODALS ================================-->
+    {% for trek in treks %}
+    <div class="modal fade" id="editModal{{ trek.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ trek.id }}"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('staff_bp.edit_trek', trek_id=trek.id) }}"
+                    style="display: contents;">
+                    <div class="modal-header bg-trekkle-accent">
+                        <h5 class="modal-title" id="editModalLabel{{ trek.id }}">
+                            Edit Trek #{{ trek.id }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <!-- ID (read-only) -->
+                            <div class="col-md-2">
+                                <label class="form-label">ID</label>
+                                <input type="text" class="form-control" value="{{ trek.id }}" disabled>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Name *</label>
+                                <input type="text" name="name" class="form-control" value="{{ trek.name }}" required disabled>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Location *</label>
+                                <input type="text" name="location" class="form-control" value="{{ trek.location }}"
+                                    required disabled>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control"
+                                    rows="2" >{{ trek.description or '' }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Difficulty *</label>
+                                <select name="difficulty" class="form-select" required disabled>
+                                    {% for d in ['Easy','Moderate','Hard','Expert'] %}
+                                    <option value="{{ d }}" {% if trek.difficulty==d %}selected{% endif %}>{{ d }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    {% for s in ['Open','Closed','Cancelled'] %}
+                                    <option value="{{ s }}" {% if trek.status==s %}selected{% endif %}>{{ s }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" >Total Slots *</label>
+                                <input type="number" name="total_slots" class="form-control" value="{{ trek.total_slots }}"
+                                    min="1" required disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Available Slots *</label>
+                                <input type="number" name="available_slots" class="form-control"
+                                    value="{{ trek.available_slots }}" min="0" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Start Date *</label>
+                                <input type="date" name="start_date" class="form-control"
+                                    value="{{ trek.start_date.isoformat() }}" required disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">End Date *</label>
+                                <input type="date" name="end_date" class="form-control"
+                                    value="{{ trek.end_date.isoformat() }}" required disabled>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Trek Updates</label>
+                                <input type="text" name="trek_updates" class="form-control"
+                                    value="{{ trek.trek_updates or 'As Scheduled' }}" >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-trekkle-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="viewUsersModal{{ trek.id }}" tabindex="-1" aria-labelledby="viewUsersModalLabel{{ trek.id }}"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-trekkle-accent">
+                        <h5 class="modal-title" id="viewUsersModalLabel{{ trek.id }}">
+                            View Users registered for {{ trek.name }} (Trek #{{ trek.id }})
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-hover table-striped align-middle mb-0" id="bookings_table">
+                        <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th style="width:60px">ID</th>
+                                <th>Trekker (Username)</th>
+                                <th>Trek Name</th>
+                                <th>Booking Date</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set bookings_data = fetch_bookings(trek.id) %}
+                            {% if bookings_data %}
+                            {% for booking, trekker, trek_info in bookings_data %}
+                            <tr>
+                                <td>{{ booking.id }}</td>
+                                <td>
+                                    <strong>{{ trekker.username }}</strong><br>
+                                    <span class="small text-muted">{{ trekker.email }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ trek_info.name }}</strong><br>
+                                    <span class="small text-muted">ID: {{ trek_info.id }} | Starts: {{ trek_info.start_date }}</span>
+                                </td>
+                                <td>
+                                    {{ booking.booking_date.strftime('%Y-%m-%d %H:%M') }}
+                                </td>
+                                <td class="text-center">
+                                    {% if booking.status == 'Booked' %}
+                                    <span class="badge bg-success">Booked</span>
+                                    {% elif booking.status == 'Cancelled' %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ booking.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No bookings found.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+{% endfor %}
+</div>
+{%endblock%}

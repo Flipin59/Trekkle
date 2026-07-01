@@ -22,10 +22,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 # Connecting our app to the db model We CREATED IN models.py
 db.init_app(app)
 
-# Register the admin blueprint
+# Register blueprints
 from admin import admin_bp
 app.register_blueprint(admin_bp)
-
+from staff import staff_bp
+app.register_blueprint(staff_bp)
 
 # LOGIN MANAGER SETUP AND RBAC setup
 login_manager = LoginManager()
@@ -140,8 +141,8 @@ def dashboard():
     
     elif current_user.role == 'Staff':
         if current_user.status == 'active':
-            flash("Login Successful")
-            return render_template('staff.html', user = current_user)
+            
+            return redirect(url_for('staff_bp.staff_dashboard'))
         elif current_user.status == 'pending':
             flash("Account activation pending try again in a while!!")
             return redirect(url_for('login', user = current_user))

@@ -27,7 +27,7 @@ def admin_dashboard():
     # --- Search / filter logic for treks ---
     search_id   = request.args.get('search_id', '').strip()
     search_name = request.args.get('search_name', '').strip()
-
+    
     query = Treks.query
     if search_id:
         query = query.filter(Treks.id == int(search_id))
@@ -215,6 +215,7 @@ def edit_trek(trek_id):
 
     # Update staff assignment: clear old, insert new
     StaffAssignment.query.filter_by(trek_id=trek_id).delete()
+    db.session.flush()
     db.session.add(StaffAssignment(trek_id=trek_id, staff_assigned=int(staff_id)))
 
     db.session.commit()
