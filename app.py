@@ -7,6 +7,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 # from flask_sqlalchemy import SQLAlchemy
 
+# ---- Admin Credentials (plain text) ----
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'admin123'
+ADMIN_EMAIL    = 'admin@trekking.com'
+ADMIN_FULLNAME = 'Administrator'
+ADMIN_PHONE    = '0000000000'
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_secretKey'
@@ -14,6 +21,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 
 # Connecting our app to the db model We CREATED IN models.py
 db.init_app(app)
+
+# Register the admin blueprint
+from admin import admin_bp
+app.register_blueprint(admin_bp)
 
 
 # LOGIN MANAGER SETUP AND RBAC setup
@@ -104,6 +115,13 @@ def login():
     if request.method == 'POST':
         user = User.query.filter_by(username=request.form['username']).first()
         if user and check_password_hash(user.password_hash, request.form['password']):
+            if user.status == 'pending':
+                flash("Account activation pending, try again in a while!!")
+                return redirect(url_for('login'))
+            elif user.status == 'blacklisted':
+                flash("Account blacklisted you cannot login")
+                return redirect(url_for('login'))
+            
             login_user(user)
             return redirect(url_for('dashboard', user = current_user))
         else:
@@ -117,16 +135,22 @@ def login():
 @login_required
 def dashboard():
 
-    # Tester:
-    return "THIS IS THE DASHBOARD PAGE"
-    # return render_template('dashboard.html', user= current_user) 
-
-
-# @app.route('/admin')
-# @login_required
-# @role_required('Admin')
-# def admin_page():
-#     return "Welcome Admin!!"
+    if current_user.role == 'Admin':
+        return redirect(url_for('admin_bp.admin_dashboard'))
+    
+    elif current_user.role == 'Staff':
+        if current_user.status == 'active':
+            flash("Login Successful")
+            return render_template('staff.html', user = current_user)
+        elif current_user.status == 'pending':
+            flash("Account activation pending try again in a while!!")
+            return redirect(url_for('login', user = current_user))
+        else:
+            flash("Account blacklisted you cannot login")
+            return redirect(url_for('login', user = current_user))
+    elif current_user.role == 'Trekker':
+        flash("Login Successful")
+        return render_template('trekker.html',user = current_user)
 
 ### -----------------------Logout-------------------------
 @app.route('/logout')
@@ -142,7 +166,31 @@ def logout():
 def profile():
     return "THIS IS THE PROFILE PAGE"
 
+
+
+
+def create_admin():
+    """Seed the default admin user if it doesn't already exist."""
+    existing = User.query.filter_by(username=ADMIN_USERNAME).first()
+    if not existing:
+        admin = User(
+            username=ADMIN_USERNAME,
+            email=ADMIN_EMAIL,
+            password_hash=generate_password_hash(ADMIN_PASSWORD),
+            full_name=ADMIN_FULLNAME,
+            phone=ADMIN_PHONE,
+            role='Admin',
+            status='active'
+        )
+        db.session.add(admin)
+        db.session.commit()
+        print(f'[+] Admin user "{ADMIN_USERNAME}" created.')
+    else:
+        print('[*] Admin user already exists, skipping seed.')
+
+
 if __name__=="__main__":
     with app.app_context():
         db.create_all()
+        create_admin()
     app.run(debug=True)

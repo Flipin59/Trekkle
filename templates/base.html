@@ -1,17 +1,24 @@
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- BOOTSTRAP CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <title>{% block title %}{% endblock %}</title>
     <style>
         :root {
-            --tk-primary: #4aa67b;     /* Alpine Teal / Pine Green */
-            --tk-secondary: #D97736;   /* Terracotta / Clay CTA */
-            --tk-bg-light: #F8F9FA;    /* Mist Background */
-            --tk-bg-dark: #1A202C;     /* Obsidian Text/Dark Elements */
-            --tk-accent: #E2ECE9;      /* Sage Green Soft Accent */
+            --tk-primary: #4aa67b;
+            /* Alpine Teal / Pine Green */
+            --tk-secondary: #D97736;
+            /* Terracotta / Clay CTA */
+            --tk-bg-light: #F8F9FA;
+            /* Mist Background */
+            --tk-bg-dark: #1A202C;
+            /* Obsidian Text/Dark Elements */
+            --tk-accent: #E2ECE9;
+            /* Sage Green Soft Accent */
         }
 
         /* Global Body Overrides */
@@ -24,11 +31,13 @@
         .navbar-trekkle {
             background-color: var(--tk-primary) !important;
         }
+
         .navbar-trekkle .navbar-brand,
         .navbar-trekkle .nav-link {
             color: #ffffff !important;
             transition: color 0.2s ease-in-out;
         }
+
         .navbar-trekkle .nav-link:hover,
         .navbar-trekkle .nav-link.active {
             color: var(--tk-accent) !important;
@@ -40,6 +49,7 @@
             color: #ffffff;
             border: none;
         }
+
         .btn-trekkle-primary:hover {
             background-color: #15322C;
             color: #ffffff;
@@ -51,93 +61,115 @@
             border: none;
             font-weight: 500;
         }
+
         .btn-trekkle-cta:hover {
             background-color: #C2632B;
             color: #ffffff;
         }
 
         /* Utility Helpers */
-        .bg-trekkle-accent { background-color: var(--tk-accent) !important; }
-        .text-trekkle-primary { color: var(--tk-primary) !important; }
-        .text-trekkle-secondary { color: var(--tk-secondary) !important; }
+        .bg-trekkle-accent {
+            background-color: var(--tk-accent) !important;
+        }
+
+        .bg-trekkle-light {
+            background-color: var(--tk-bg-light) !important;
+        }
+
+        .text-trekkle-primary {
+            color: var(--tk-primary) !important;
+        }
+
+        .text-trekkle-secondary {
+            color: var(--tk-secondary) !important;
+        }
 
 
         /* Container rules */
         .scroll-container {
-        height: 100vh;
-        overflow-y: scroll;
-        scroll-snap-type: y mandatory;
-        scroll-behavior: smooth;
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
         }
 
         /* Individual section rules */
         .scroll-container section {
-        scroll-snap-align: start;
+            scroll-snap-align: start;
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-trekkle shadow-lg">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="../static/images/LOGO_Trekkle.png" alt="Trekkle Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
-            <span class="fw-bold">Trekkle</span>
-        </a>
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{url_for('home')}}">
+                <img src="../static/images/LOGO_Trekkle.png" alt="Trekkle Logo" width="30" height="30"
+                    class="d-inline-block align-text-top me-2">
+                <span class="fw-bold">Trekkle</span>
+            </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <div class="d-flex align-items-center ms-auto gap-2">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('home')}}#about">Who we are</a>
-                </li>
-            {%if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('dashboard')}}">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('profile')}}">Profile</a>
-                </li>
-                <div class="d-flex align-items-center">
-                    <a href="{{ url_for('logout')}}" class="btn btn-trekkle-cta mx-2 px-4"  role="button">Logout</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center ms-auto gap-2">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{url_for('home')}}#about">Who we are</a>
+                        </li>
+                        {%if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{url_for('dashboard')}}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{url_for('profile')}}">Profile</a>
+                        </li>
+                        <div class="d-flex align-items-center">
+                            <a href="{{ url_for('logout')}}" class="btn btn-trekkle-cta mx-2 px-4"
+                                role="button">Logout</a>
+                        </div>
+                        <span class="navbar-text">
+                            Logged in as {{user.username}}!!
+                        </span>
+                        {%else%}
+                        <div class="d-flex align-items-center">
+                            <a href="{{ url_for('login')}}" class="btn btn-trekkle-cta mx-2 my-2 "
+                                role="button">Login</a>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <a href="{{ url_for('register')}}" class="btn btn-trekkle-cta mx-2 my-2"
+                                role="button">Signup</a>
+                        </div>
+                        {%endif%}
                 </div>
-                <span class="navbar-text">
-                    Logged in as {{user.username}}!!
-                </span>
-            {%else%}
-                <div class="d-flex align-items-center">
-                        <a href="{{ url_for('login')}}" class="btn btn-trekkle-cta mx-2 my-2 "  role="button">Login</a>
-                </div>
-                <div class="d-flex align-items-center">
-                        <a href="{{ url_for('register')}}" class="btn btn-trekkle-cta mx-2 my-2" role="button">Signup</a>
-                </div>
-            {%endif%}
+            </div>
         </div>
-        </div>
-    </div>    
     </nav>
 
     {%block subnav%}{%endblock%}
-    
-    
+
+
     {% with messages = get_flashed_messages()%}
-        {% if messages %}
-            {%for msg in messages%}
-            <div class="alert alert-info" role="alert">
-                {{ msg }}
-            </div>
-            {% endfor %}
-        {%endif%}
+    {% if messages %}
+    {%for msg in messages%}
+    <div class="alert alert-info" role="alert">
+        {{ msg }}
+    </div>
+    {% endfor %}
+    {%endif%}
     {%endwith%}
-    
+
     {%block content%}
     {%endblock%}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>

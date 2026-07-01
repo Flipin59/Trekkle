@@ -1,0 +1,556 @@
+{%extends "base.html"%}
+{%block title%} Admin Page{%endblock%}
+
+{%block subnav%}
+<div class="navbar navbar-expand-lg navbar-dark navbar-trekkle shadow-lg sticky-top">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white fw-bold ">Navigate dashboard:</span>
+            <a href="#treks-section" class="nav-link text-white fw-semibold px-3 py-1">
+                Manage Treks
+            </a>
+            <a href="#users-section" class="nav-link text-white fw-semibold px-3 py-1 ">
+                Manage Users
+            </a>
+            <a href="#bookings-section" class="nav-link text-white fw-semibold px-3 py-1 ">
+                Manage Bookings
+            </a>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+{%block content%}
+
+
+<!----------------------------- LLM GENERATED CODE STARTS HERE ------------------------------------------------->
+
+<div class="container py-4">
+
+    <!-- ============ HEADER ============ -->
+    <h1 class="mb-2 text-trekkle-primary" id="treks-section">Manage Treks</h1>
+    <p class="text mb-4">Search, edit, or delete existing treks. Scroll the table if entries overflow.</p>
+
+    <!-- ============ SEARCH BAR ROW ============ -->
+    <div class="row g-3 mb-4 align-items-end">
+        <!-- Search by ID -->
+        <div class="col-12 col-md-4">
+            <form method="GET" action="{{ url_for('admin_bp.admin_dashboard') }}" class="d-flex gap-2"
+                id="form_search_id">
+                <input type="number" name="search_id" class="form-control" placeholder="Trek ID" value="{{ search_id }}"
+                    min="1">
+                <button type="submit" class="btn btn-trekkle-primary text-nowrap">Search ID</button>
+            </form>
+        </div>
+        <!-- Search by Name -->
+        <div class="col-12 col-md-5">
+            <form method="GET" action="{{ url_for('admin_bp.admin_dashboard') }}" class="d-flex gap-2"
+                id="form_search_name">
+                <input type="text" name="search_name" class="form-control" placeholder="Trek name"
+                    value="{{ search_name }}">
+                <button type="submit" class="btn btn-trekkle-primary text-nowrap">Search Name</button>
+            </form>
+        </div>
+        <!-- Reset -->
+        <div class="col-12 col-md-3 text-md-end">
+            <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="btn btn-outline-secondary w-100"
+                id="btn_reset_search">
+                Reset / Show All
+            </a>
+        </div>
+    </div>
+
+    <!-- ============ TREK TABLE (scrollable) ============ -->
+    <div style="max-height: 420px; overflow-y: auto;"> <!--Limits the height of the table-->
+        <table class="table table-hover table-striped align-middle mb-0" id="treks_table">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:60px">ID</th>
+                    <th>Name</th>
+                    <th>Staff</th>
+                    <th style="width:80px" class="text-center">Edit</th>
+                    <th style="width:80px" class="text-center">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if treks %}
+                {% for trek in treks %}
+                <tr>
+                    <td>{{ trek.id }}</td>
+                    <td>{{ trek.name }}</td>
+                    <td>
+                        {% if staff_map.get(trek.id) %}
+                        {{ staff_map[trek.id] }}
+                        {% else %}
+                        <span class="text-muted fst-italic">— none —</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-trekkle-cta" data-bs-toggle="modal"
+                            data-bs-target="#editModal{{ trek.id }}" title="Edit trek">
+                            Edit
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <form method="POST" action="{{ url_for('admin_bp.delete_trek', trek_id=trek.id) }}">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Delete trek">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No treks found.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============ ADD NEW TREK BUTTON ============ -->
+    <div class="mt-4 mb-5">
+        <button class="btn btn-trekkle-primary" type="button" data-bs-toggle="modal" data-bs-target="#addTrekModal"
+            id="btn_add_trek_toggle">
+            Add New Trek
+        </button>
+    </div>
+
+<!----------------------------- LLM GENERATED CODE ENDS HERE ------------------------------------------------->
+
+    
+    <!-- ============ USER CONTROL SECTION ============ -->
+    <h1 class="mb-2 text-trekkle-primary mt-5" id="users-section">User Controls & Management</h1>
+    <p class="text mb-4">Approve registration requests or blacklist/activate registered users below.</p>
+
+    <div class="row g-3 mb-4" id="user_control_section">
+
+        <!-- Left Column: Pending Staff Approvals (Boxed separately) -->
+        <div class="col-12 col-md-6">
+            <div class="card bg-trekkle-accent border border-white border-5 rounded-3 p-4 h-100">
+                <h3 class="mb-3 fw-bold text-dark text-center">Pending Staff Approvals</h3>
+                <div style="max-height: 420px; overflow-y: auto;" class="bg-white rounded border shadow-sm">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                        <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Details</th>
+                                <th class="text-center" style="min-width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if pending_staff %}
+                            {% for s in pending_staff %}
+                            <tr>
+                                <td><strong>{{ s.username }}</strong></td>
+                                <td>{{ s.full_name }}</td>
+                                <td class="small text-muted">
+                                    {{ s.email }}<br>
+                                    {{ s.phone or 'No phone' }}
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <form method="POST"
+                                            action="{{ url_for('admin_bp.update_user_status', user_id=s.id, new_status='active') }}"
+                                            class="mb-0">
+                                            <button type="submit" class="btn btn-sm btn-success py-1">Approve</button>
+                                        </form>
+                                        <form method="POST"
+                                            action="{{ url_for('admin_bp.update_user_status', user_id=s.id, new_status='blacklisted') }}"
+                                            class="mb-0">
+                                            <button type="submit" class="btn btn-sm btn-danger py-1">Blacklist</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No pending staff registrations.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: User Search & Blacklisting (Boxed separately) -->
+        <div class="col-12 col-md-6">
+            <div class="card bg-trekkle-accent border border-white border-5 rounded-3 p-4 h-100">
+                <h3 class="mb-3 fw-bold text-dark text-center">Manage Registered Users</h3>
+
+                <!-- Search Box -->
+                <form method="GET" action="{{ url_for('admin_bp.admin_dashboard') }}#user_control_section"
+                    class="d-flex gap-2 mb-3">
+                    <input type="text" name="user_search" class="form-control" placeholder="Search by username..."
+                        value="{{ user_search }}">
+                    
+                    
+                    <!-- PRESERVE ANY ACTIVE TREK SEARCH -->
+                    {% if search_id or search_name %}
+                    <input type="hidden" name="search_id" value="{{ search_id }}">
+                    <input type="hidden" name="search_name" value="{{ search_name }}">
+                    {% endif %}
+                    <button type="submit" class="btn btn-dark text-nowrap">Search</button>
+                    {% if user_search %}
+                    <a href="{{ url_for('admin_bp.admin_dashboard') }}#user_control_section"
+                        class="btn btn-outline-secondary">Clear</a>
+                    {% endif %}
+                </form>
+
+                <div style="max-height: 420px; overflow-y: auto;" class="bg-white rounded border shadow-sm">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                        <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if all_users %}
+                            {% for u in all_users %}
+                            <tr>
+                                <td><strong>{{ u.username }}</strong></td>
+                                <td><span class="badge bg-secondary">{{ u.role }}</span></td>
+                                <td>
+                                    {% if u.status == 'active' %}
+                                    <span class="text-success fw-bold">Active</span>
+                                    {% elif u.status == 'blacklisted' %}
+                                    <span class="text-danger fw-bold">Blacklisted</span>
+                                    {% else %}
+                                    <span class="text-warning fw-bold">{{ u.status|capitalize }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if u.status == 'blacklisted' %}
+                                    <form method="POST"
+                                        action="{{ url_for('admin_bp.update_user_status', user_id=u.id, new_status='active') }}"
+                                        class="mb-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-success py-1">Approve /
+                                            Activate</button>
+                                    </form>
+                                    {% else %}
+                                    <form method="POST"
+                                        action="{{ url_for('admin_bp.update_user_status', user_id=u.id, new_status='blacklisted') }}"
+                                        class="mb-0">
+                                        <button type="submit"
+                                            class="btn btn-sm btn-outline-danger py-1">Blacklist</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No users found.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============ BOOKING MANAGEMENT SECTION ============ -->
+    <h1 class="mb-2 text-trekkle-primary mt-5" id="bookings-section">Booking Management</h1>
+    <p class="text mb-4">Create, search, edit, or cancel trek bookings. Scroll the table if entries overflow.</p>
+
+    <!-- Booking Search Row -->
+    <div class="row g-3 mb-4 align-items-end">
+        <!-- Search by Booking ID -->
+        <div class="col-12 col-md-3">
+            <form method="GET" action="{{ url_for('admin_bp.admin_dashboard') }}" class="d-flex gap-2"
+                id="form_search_booking_id">
+                <input type="number" name="search_booking_id" class="form-control" placeholder="Booking ID"
+                    value="{{ search_booking_id or '' }}" min="1">
+                <button type="submit" class="btn btn-trekkle-primary text-nowrap">Search ID</button>
+            </form>
+        </div>
+        <!-- Search by Username -->
+        <div class="col-12 col-md-3">
+            <form method="GET" action="{{ url_for('admin_bp.admin_dashboard') }}" class="d-flex gap-2"
+                id="form_search_username">
+                <input type="text" name="search_username" class="form-control" placeholder="Username"
+                    value="{{ search_username or '' }}">
+                <button type="submit" class="btn btn-trekkle-primary text-nowrap">Search User</button>
+            </form>
+        </div>
+        <!-- Search by Trek Name -->
+        <div class="col-12 col-md-3">
+            <form method="GET" action="{{ url_for('admin_bp.admin_dashboard') }}" class="d-flex gap-2"
+                id="form_search_trek_name">
+                <input type="text" name="search_trek_name" class="form-control" placeholder="Trek name"
+                    value="{{ search_trek_name or '' }}">
+                <button type="submit" class="btn btn-trekkle-primary text-nowrap">Search Trek</button>
+            </form>
+        </div>
+        <!-- Reset -->
+        <div class="col-12 col-md-3 text-md-end">
+            <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="btn btn-outline-secondary w-100"
+                id="btn_reset_bookings">
+                Reset / Show All
+            </a>
+        </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div style="max-height: 420px; overflow-y: auto;" class="bg-white rounded border shadow-sm mb-4">
+        <table class="table table-hover table-striped align-middle mb-0" id="bookings_table">
+            <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+                <tr>
+                    <th style="width:60px">ID</th>
+                    <th>Trekker (Username)</th>
+                    <th>Trek Name</th>
+                    <th>Booking Date</th>
+                    <th class="text-center">Status</th>
+                    <th style="width:120px" class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if bookings_data %}
+                {% for booking, trekker, trek in bookings_data %}
+                <tr>
+                    <td>{{ booking.id }}</td>
+                    <td>
+                        <strong>{{ trekker.username }}</strong><br>
+                        <span class="small text-muted">{{ trekker.email }}</span>
+                    </td>
+                    <td>
+                        <strong>{{ trek.name }}</strong><br>
+                        <span class="small text-muted">ID: {{ trek.id }} | Starts: {{ trek.start_date }}</span>
+                    </td>
+                    <td>
+                        {{ booking.booking_date.strftime('%Y-%m-%d %H:%M') }}
+                    </td>
+                    <td class="text-center">
+                        {% if booking.status == 'Booked' %}
+                        <span class="badge bg-success">Booked</span>
+                        {% elif booking.status == 'Cancelled' %}
+                        <span class="badge bg-danger">Cancelled</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ booking.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if booking.status == 'Booked' %}
+                        <form method="POST" action="{{ url_for('admin_bp.cancel_booking', booking_id=booking.id) }}"
+                            onsubmit="return confirm('Are you sure you want to cancel Booking #{{ booking.id }}?');"
+                            class="mb-0">
+                            <button type="submit" class="btn btn-sm btn-danger py-1" title="Cancel booking">
+                                Cancel Booking
+                            </button>
+                        </form>
+                        {% elif booking.status == 'Cancelled' %}
+                        <form method="POST" action="{{ url_for('admin_bp.uncancel_booking', booking_id=booking.id) }}"
+                            onsubmit="return confirm('Are you sure you want to restore Booking #{{ booking.id }}?');"
+                            class="mb-0">
+                            <button type="submit" class="btn btn-sm btn-success py-1" title="Uncancel booking">
+                                Uncancel Booking
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted fst-italic">No action</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No bookings found.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div><!-- /container -->
+
+
+<!-- ============ ADD TREK MODAL ============ -->
+<div class="modal fade" id="addTrekModal" tabindex="-1" aria-labelledby="addTrekModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin_bp.add_trek') }}" id="form_add_trek"
+                style="display: contents;">
+                <div class="modal-header bg-trekkle-accent">
+                    <h5 class="modal-title" id="addTrekModalLabel">Add New Trek</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Name *</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Location *</label>
+                            <input type="text" name="location" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Difficulty *</label>
+                            <select name="difficulty" class="form-select" required>
+                                <option value="Easy">Easy</option>
+                                <option value="Moderate">Moderate</option>
+                                <option value="Hard">Hard</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="Open">Open</option>
+                                <option value="Closed">Closed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Total Slots *</label>
+                            <input type="number" name="total_slots" class="form-control" min="1" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Available Slots *</label>
+                            <input type="number" name="available_slots" class="form-control" min="0" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" name="end_date" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Trek Updates</label>
+                            <input type="text" name="trek_updates" class="form-control" value="As Scheduled">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Assign Staff *</label>
+                            <select name="staff_id" class="form-select" required>
+                                <option value="">— Select staff —</option>
+                                {% for s in staff_list %}
+                                <option value="{{ s.id }}">{{ s.username }} ({{ s.full_name }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-trekkle-primary" id="btn_submit_add_trek">Save Trek</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============ EDIT MODALS (one per trek) ============ -->
+{% for trek in treks %}
+<div class="modal fade" id="editModal{{ trek.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ trek.id }}"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin_bp.edit_trek', trek_id=trek.id) }}"
+                style="display: contents;">
+                <div class="modal-header bg-trekkle-accent">
+                    <h5 class="modal-title" id="editModalLabel{{ trek.id }}">
+                        Edit Trek #{{ trek.id }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- ID (read-only) -->
+                        <div class="col-md-2">
+                            <label class="form-label">ID</label>
+                            <input type="text" class="form-control" value="{{ trek.id }}" disabled>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Name *</label>
+                            <input type="text" name="name" class="form-control" value="{{ trek.name }}" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Location *</label>
+                            <input type="text" name="location" class="form-control" value="{{ trek.location }}"
+                                required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control"
+                                rows="2">{{ trek.description or '' }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Difficulty *</label>
+                            <select name="difficulty" class="form-select" required>
+                                {% for d in ['Easy','Moderate','Hard','Expert'] %}
+                                <option value="{{ d }}" {% if trek.difficulty==d %}selected{% endif %}>{{ d }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                {% for s in ['Open','Closed','Cancelled'] %}
+                                <option value="{{ s }}" {% if trek.status==s %}selected{% endif %}>{{ s }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Total Slots *</label>
+                            <input type="number" name="total_slots" class="form-control" value="{{ trek.total_slots }}"
+                                min="1" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Available Slots *</label>
+                            <input type="number" name="available_slots" class="form-control"
+                                value="{{ trek.available_slots }}" min="0" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" name="start_date" class="form-control"
+                                value="{{ trek.start_date.isoformat() }}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" name="end_date" class="form-control"
+                                value="{{ trek.end_date.isoformat() }}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Trek Updates</label>
+                            <input type="text" name="trek_updates" class="form-control"
+                                value="{{ trek.trek_updates or 'As Scheduled' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Assign Staff *</label>
+                            <select name="staff_id" class="form-select" required>
+                                <option value="">— Select staff —</option>
+                                {% for s in staff_list %}
+                                <option value="{{ s.id }}" {% if staff_map.get(trek.id) and
+                                    staff_map[trek.id]==s.username %}selected{% endif %}>{{ s.username }} ({{
+                                    s.full_name }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-trekkle-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{%endblock%}
