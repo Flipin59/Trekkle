@@ -11,15 +11,15 @@ load_dotenv()
 # from flask_sqlalchemy import SQLAlchemy
 
 # admin credentials (loaded from .env)
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
-ADMIN_EMAIL    = os.getenv('ADMIN_EMAIL', 'admin@trekking.com')
-ADMIN_FULLNAME = os.getenv('ADMIN_FULLNAME', 'Administrator')
-ADMIN_PHONE    = os.getenv('ADMIN_PHONE', '0000000000')
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+ADMIN_EMAIL    = os.getenv('ADMIN_EMAIL')
+ADMIN_FULLNAME = os.getenv('ADMIN_FULLNAME')
+ADMIN_PHONE    = os.getenv('ADMIN_PHONE')
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'super_secret_secretKey'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 
 # connecting our app to the db model we created in models.py
