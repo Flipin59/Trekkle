@@ -27,7 +27,42 @@
 
 <div class="container py-4">
 
-    
+    <!-- dashboard stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-trekkle-accent border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <h6 class="text-uppercase text-muted small mb-1">total treks</h6>
+                    <h3 class="fw-bold mb-0 text-trekkle-primary">{{ total_treks }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-trekkle-accent border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <h6 class="text-uppercase text-muted small mb-1">total users</h6>
+                    <h3 class="fw-bold mb-0 text-trekkle-primary">{{ total_users }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-trekkle-accent border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <h6 class="text-uppercase text-muted small mb-1">total staff</h6>
+                    <h3 class="fw-bold mb-0 text-trekkle-primary">{{ total_staffs }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-trekkle-accent border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <h6 class="text-uppercase text-muted small mb-1">total bookings</h6>
+                    <h3 class="fw-bold mb-0 text-trekkle-primary">{{ total_bookings }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <h1 class="mb-2 text-trekkle-primary" id="treks-section">Manage Treks</h1>
     <p class="text mb-4">Search, edit, or delete existing treks.</p>
 
@@ -320,11 +355,11 @@
                     <td>{{ booking.id }}</td>
                     <td>
                         <strong>{{ trekker.username }}</strong><br>
-                        <span class="small text-muted">{{ trekker.email }}</span>
+                        
                     </td>
                     <td>
                         <strong>{{ trek.name }}</strong><br>
-                        <span class="small text-muted">ID: {{ trek.id }} | Starts: {{ trek.start_date }}</span>
+                        
                     </td>
                     <td>
                         {{ booking.booking_date.strftime('%Y-%m-%d %H:%M') }}
@@ -363,7 +398,7 @@
                 {% endfor %}
                 {% else %}
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-4">No bookings found.</td>
+                    <td colspan="6" class="text-center text-muted py-4">No bookings found.</td>
                 </tr>
                 {% endif %}
             </tbody>
@@ -410,6 +445,8 @@
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select">
                                 <option value="Open">Open</option>
+                                <option value="Started">Started</option>
+                                <option value="Completed">Completed</option>
                                 <option value="Closed">Closed</option>
                                 <option value="Cancelled">Cancelled</option>
                             </select>
@@ -501,7 +538,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select">
-                                {% for s in ['Open','Closed','Cancelled'] %}
+                                {% for s in ['Open','Started','Completed','Closed','Cancelled'] %}
                                 <option value="{{ s }}" {% if trek.status==s %}selected{% endif %}>{{ s }}</option>
                                 {% endfor %}
                             </select>

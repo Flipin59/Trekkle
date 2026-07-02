@@ -1,0 +1,282 @@
+{%extends "base.html"%}
+{%block title%} Trekker Page{%endblock%}
+
+{%block subnav%}
+<div class="navbar navbar-expand-lg navbar-dark navbar-trekkle shadow-lg sticky-top">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-white fw-bold ">Navigate dashboard:</span>
+            <a href="#view-treks" class="nav-link text-white fw-semibold px-3 py-1">
+                View Treks
+            </a>
+            <a href="#view-bookings" class="nav-link text-white fw-semibold px-3 py-1">
+                View Bookings
+            </a>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+{%block content%}
+<div class="container py-4">
+    <div class="row g-3 mb-4 align-items-end">
+        <h1 class="mb-2 text-trekkle-primary" id="view-treks">Upcoming Treks</h1>
+        <p class="text mb-4">Interested in taking part?</p>
+
+        <!-- Unified Search Form -->
+        <div class="col-12">
+            <form method="GET" action="{{ url_for('trekker_bp.trekker_dashboard') }}" class="row g-2 align-items-center" id="form_search_treks">
+                <div class="col-12 col-md-2">
+                    <input type="number" name="search_id" class="form-control" placeholder="Trek ID" value="{{ search_id }}" min="1">
+                </div>
+                <div class="col-12 col-md-3">
+                    <input type="text" name="search_name" class="form-control" placeholder="Trek name" value="{{ search_name }}">
+                </div>
+                <div class="col-12 col-md-3">
+                    <input type="text" name="search_location" class="form-control" placeholder="Location" value="{{ search_location }}">
+                </div>
+                <div class="col-12 col-md-2">
+                    <select name="search_difficulty" class="form-select">
+                        <option value="">Difficulty (All)</option>
+                        <option value="Easy" {% if search_difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+                        <option value="Moderate" {% if search_difficulty == 'Moderate' %}selected{% endif %}>Moderate</option>
+                        <option value="Hard" {% if search_difficulty == 'Hard' %}selected{% endif %}>Hard</option>
+                        <option value="Expert" {% if search_difficulty == 'Expert' %}selected{% endif %}>Expert</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-trekkle-primary flex-grow-1">Search</button>
+                    <a href="{{ url_for('trekker_bp.trekker_dashboard') }}" class="btn btn-outline-secondary" title="Reset Filters">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-------------------- TREK TABLE  -------------------->
+    <div style="max-height: 420px; overflow-y: auto;"> <!--Limits the height of the table-->
+        <table class="table table-hover table-striped align-middle mb-0" id="treks_table">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:60px">ID</th>
+                    <th>Name</th>
+                    <th>Location</th>
+
+                    <th>Start Date</th>
+                    <th style="width:80px" class="text-center">View Details</th>
+                    <th style="width:80px" class="text-center">Book</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if treks %}
+                {% for trek in treks %}
+                <tr>
+                    <td>{{ trek.id }}</td>
+                    <td>{{ trek.name }}</td>
+                    <td>
+                        {{ trek.location }}
+                    </td>
+                    <td>
+                        {{ trek.start_date.strftime('%Y-%m-%d') }}
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-trekkle-cta" data-bs-toggle="modal"
+                            data-bs-target="#viewModal{{ trek.id }}" title="View Details">
+                            View Details
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <form method="POST" action="{{ url_for('trekker_bp.book_trek', trek_id=trek.id) }}">
+                            <button type="submit" class="btn btn-sm btn-trekkle-cta" title="Book trek">
+                                Book
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No treks found.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+    <div class="row g-3 mb-4 align-items-end mt-4">
+        <h1 class="mb-2 text-trekkle-primary" id="view-bookings">View Bookings</h1>
+        <p class="text mb-4">Your booking history</p>
+        <div style="max-height: 420px; overflow-y: auto;"> <!--Limits the height of the table-->
+            <table class="table table-hover table-striped align-middle mb-0" id="bookings_table">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:60px">ID</th>
+                        <th>Trek ID</th>
+                        <th>Trek Name</th>
+                        <th>Start Date</th>
+                        <th>Booking Status</th>
+                        <th>Booking Date</th>
+                        <th style="width:80px" class="text-center">View Details</th>
+                        <th style="width:80px" class="text-center">Cancel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if my_bookings %}
+                    {% for booking, trek_info in my_bookings %}
+                    <tr>
+                        <td>{{ booking.id }}</td>
+                        <td>{{ booking.trek_id }}</td>
+                        <td>
+                            {{ trek_info.name }}
+                        </td>
+                        <td>
+                            {{ trek_info.start_date.strftime('%Y-%m-%d') }}
+                        </td>
+                        <td class="text-center">
+                            {% if booking.status == 'Booked' %}
+                            <span class="badge bg-success">Booked</span>
+                            {% elif booking.status == 'Cancelled' %}
+                            <span class="badge bg-danger">Cancelled</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ booking.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ booking.booking_date.strftime('%Y-%m-%d %H:%M') }}
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-trekkle-cta" data-bs-toggle="modal"
+                                data-bs-target="#viewModal{{ booking.trek_id }}" title="View Details">
+                                View Details
+                            </button>
+                        </td>
+                        <td class="text-center">
+                            {% if booking.status != 'Cancelled' %}
+                            {% if trek_info.status != 'Completed' and trek_info.start_date > date.today() %}
+                            <form method="POST"
+                                action="{{ url_for('trekker_bp.cancel_booking', booking_id=booking.id) }}"
+                                style="display:inline;" onsubmit="return confirm('cancel this booking?');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Cancel booking">
+                                    Cancel
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted small">Not Cancelable</span>
+                            {% endif %}
+                            {% else %}
+                            {% if trek_info.status == 'Open' and trek_info.start_date >= date.today() %}
+                            <form method="POST"
+                                action="{{ url_for('trekker_bp.uncancel_booking', booking_id=booking.id) }}"
+                                style="display:inline;" onsubmit="return confirm('restore this booking?');">
+                                <button type="submit" class="btn btn-sm btn-success" title="Restore booking">
+                                    Uncancel
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No Bookings found.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-----------------------VIEW MODAL----------------------->
+    <!-- Reusing same view modal as trekker but making it disabled -->
+    {% for trek in all_treks %}
+    <div class="modal fade" id="viewModal{{ trek.id }}" tabindex="-1" aria-labelledby="viewModalLabel{{ trek.id }}"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <form method="POST" action="#" style="display: contents;"> <!-- DUMMY FORM NO ACTUAL ACTION-->
+                    <div class="modal-header bg-trekkle-accent">
+                        <h5 class="modal-title" id="viewModalLabel{{ trek.id }}">
+                            View Trek #{{ trek.id }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <!-- ID (read-only) -->
+                            <div class="col-md-2">
+                                <label class="form-label">ID</label>
+                                <input type="text" class="form-control" value="{{ trek.id }}" disabled>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Name *</label>
+                                <input type="text" name="name" class="form-control" value="{{ trek.name }}" required
+                                    disabled>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Location *</label>
+                                <input type="text" name="location" class="form-control" value="{{ trek.location }}"
+                                    required disabled>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" disabled
+                                    rows="2">{{ trek.description or '' }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Difficulty *</label>
+                                <select name="difficulty" class="form-select" required disabled>
+                                    {% for d in ['Easy','Moderate','Hard','Expert'] %}
+                                    <option value="{{ d }}" {% if trek.difficulty==d %}selected{% endif %}>{{ d }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select" disabled>
+                                    {% for s in ['Open','Started','Completed','Closed','Cancelled'] %}
+                                    <option value="{{ s }}" {% if trek.status==s %}selected{% endif %}>{{ s }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Total Slots *</label>
+                                <input type="number" name="total_slots" class="form-control"
+                                    value="{{ trek.total_slots }}" min="1" required disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Available Slots *</label>
+                                <input type="number" name="available_slots" class="form-control"
+                                    value="{{ trek.available_slots }}" min="0" required disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Start Date *</label>
+                                <input type="date" name="start_date" class="form-control"
+                                    value="{{ trek.start_date.isoformat() }}" required disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">End Date *</label>
+                                <input type="date" name="end_date" class="form-control"
+                                    value="{{ trek.end_date.isoformat() }}" required disabled>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Trek Updates</label>
+                                <input type="text" name="trek_updates" class="form-control"
+                                    value="{{ trek.trek_updates or 'As Scheduled' }}" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{%endblock%}

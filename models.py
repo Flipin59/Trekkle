@@ -1,4 +1,4 @@
-# THIS IMPLEMENTS THE DATABASE SCHEMA DEFINITIONS 
+# database schema definitions
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime, timezone
@@ -13,10 +13,10 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(150), nullable=False)
     phone = db.Column(db.String(20))
     
-    # USE CONVENTION : Admin, Trekker, Staff
+    # Admin, Trekker, or Staff
     role = db.Column(db.String(20), nullable=False, default="trekker")
     
-    # USE CONVENTION , ALL SMALL CASE : active/pending/blacklisted
+    # active, pending, or blacklisted
     status = db.Column(db.String(20), nullable=False, default="pending")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -38,16 +38,16 @@ class Treks(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 
-# HERE WE ASSUME THAT ONLY ONE STAFF GETS ASSIGNED ONE TREK. 
-# If many staff can be assigned to one trek , can remove primary_key
+# maps treks to assigned staff members
 class StaffAssignment(db.Model):
     trek_id = db.Column(db.Integer, db.ForeignKey("treks.id", ondelete="CASCADE"), primary_key=True)
     staff_assigned = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), primary_key=True)
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    trek_id = db.Column(db.Integer, db.ForeignKey("treks.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    trek_id = db.Column(db.Integer, db.ForeignKey("treks.id", ondelete="CASCADE"), nullable=False)
     booking_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    # follow convention for booking status: booked, cancelled, completed
     status = db.Column(db.String(20), nullable=False, default="Booked")
 

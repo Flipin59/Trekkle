@@ -5,46 +5,51 @@ from datetime import timedelta
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from dotenv import load_dotenv
+
+load_dotenv()
 # from flask_sqlalchemy import SQLAlchemy
 
-# ---- Admin Credentials (plain text) ----
-ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'admin123'
-ADMIN_EMAIL    = 'admin@trekking.com'
-ADMIN_FULLNAME = 'Administrator'
-ADMIN_PHONE    = '0000000000'
+# admin credentials (loaded from .env)
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+ADMIN_EMAIL    = os.getenv('ADMIN_EMAIL', 'admin@trekking.com')
+ADMIN_FULLNAME = os.getenv('ADMIN_FULLNAME', 'Administrator')
+ADMIN_PHONE    = os.getenv('ADMIN_PHONE', '0000000000')
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_secretKey'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 
-# Connecting our app to the db model We CREATED IN models.py
+# connecting our app to the db model we created in models.py
 db.init_app(app)
 
-# Register blueprints
+# register blueprints
 from admin import admin_bp
 app.register_blueprint(admin_bp)
 from staff import staff_bp
 app.register_blueprint(staff_bp)
+from trekker import trekker_bp
+app.register_blueprint(trekker_bp)
 
-# LOGIN MANAGER SETUP AND RBAC setup
+
+# login manager setup and rbac
 login_manager = LoginManager()
 login_manager.login_view='login'
 login_manager.init_app(app)
 
 
 
-# f is the decorated function. The ROLE_REQUIRES ACTS LIKE A GATEKEEPER
-# FUNCTION TO CHECK ROLE BEFORE ALLOWING THE CONTROLLER TO CALL THE 
-# ACTUAL INTENDED FUNCTION
+# role_required acts like a gatekeeper, checks role before
+# letting the controller call the actual function
 
 def role_required(role):
     def decorator(f):
         @wraps(f)
         def wrapped(*args,**kwargs):
             if current_user.role !=role:
-                abort(403) #FORBIDDEN
+                abort(403) # forbidden
             return f(*args, **kwargs)
         return wrapped
     return decorator
@@ -60,7 +65,7 @@ def load_user(user_id):
 def home():
     return render_template("index.html",user = current_user)
 
-### -----------------------Signup Page-------------------------
+### signup page
 @app.route("/signup", methods=['GET', 'POST'])
 def register():
 
@@ -77,7 +82,7 @@ def register():
         full_name = request.form['full_name']
         phone = request.form['phone']
         status = 'pending'
-        # Guardrail against admin registration through curl requests
+        # guardrail against admin registration through curl requests
         if(role == 'Admin'):
             flash('Admin role cannot be selected')
             return redirect(url_for("register"))
@@ -107,7 +112,7 @@ def register():
     
     return render_template('signup.html',user = current_user)
 
-### -----------------------Login Page-------------------------
+### login page
 @app.route('/login', methods = ['GET','POST'])
 def login():
     if current_user.is_authenticated:
@@ -131,7 +136,7 @@ def login():
     
     return render_template('login.html',user=current_user)
 
-### -----------------------Dashboard-------------------------
+### dashboard
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -150,10 +155,17 @@ def dashboard():
             flash("Account blacklisted you cannot login")
             return redirect(url_for('login', user = current_user))
     elif current_user.role == 'Trekker':
-        flash("Login Successful")
-        return render_template('trekker.html',user = current_user)
+       if current_user.status == 'active':
+            
+            return redirect(url_for('trekker_bp.trekker_dashboard'))
+       elif current_user.status == 'pending':
+           flash("Account activation pending try again in a while!!")
+           return redirect(url_for('login', user = current_user))
+       else:
+           flash("Account blacklisted you cannot login")
+           return redirect(url_for('login', user = current_user))
 
-### -----------------------Logout-------------------------
+### logout
 @app.route('/logout')
 @login_required
 def logout():
@@ -161,17 +173,40 @@ def logout():
     flash('Logged out successfully!!')
     return redirect(url_for('home',user=current_user))
 
-### -----------------------Profile-------------------------
-@app.route('/Profile')
+### profile
+@app.route('/Profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return "THIS IS THE PROFILE PAGE"
+    if request.method == 'POST':
+        email = request.form['email'].strip()
+        full_name = request.form['full_name'].strip()
+        phone = request.form['phone'].strip()
+        password = request.form.get('password', '').strip()
+
+        # check if email is already taken by another user
+        existing_email = User.query.filter(User.email == email, User.id != current_user.id).first()
+        if existing_email:
+            flash('Email already registered by another account.')
+            return redirect(url_for('profile'))
+
+        current_user.email = email
+        current_user.full_name = full_name
+        current_user.phone = phone
+
+        if password:
+            current_user.password_hash = generate_password_hash(password)
+
+        db.session.commit()
+        flash('Profile updated successfully.')
+        return redirect(url_for('profile'))
+
+    return render_template('profile.html', user=current_user)
 
 
 
 
 def create_admin():
-    """Seed the default admin user if it doesn't already exist."""
+    """seed the default admin user if it doesn't already exist."""
     existing = User.query.filter_by(username=ADMIN_USERNAME).first()
     if not existing:
         admin = User(

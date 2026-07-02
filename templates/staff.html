@@ -18,7 +18,7 @@
 
 {% block content %}
 <div class="container py-4">
-    <h1 class="mb-2 text-trekkle-primary" id="treks-section">Manage Upcomming Treks</h1>
+    <h1 class="mb-2 text-trekkle-primary" id="treks-section">Manage Upcoming Treks</h1>
     <p class="text mb-4">See the treks assigned to you</p>
     <!----------------------------SEARCH BAR ROW ---------------------------------->
     <!-- Same Search Bar as admins -->
@@ -59,6 +59,8 @@
                     <th>Name</th>
                     <th>Location</th>
                     <th>Date</th>
+                    <th>Status</th>
+                    <th class="text-center">Registered Users</th>
                     <th style="width:80px" class="text-center">Details/Edit</th>
                     <th style="width:80px" class="text-center">View Registered Users</th>
 
@@ -72,6 +74,22 @@
                     <td>{{ trek.name }}</td>
                     <td>{{ trek.location}}</td>
                     <td>{{ trek.start_date}}</td>
+                    <td>
+                        {% if trek.status == 'Open' %}
+                        <span class="badge bg-success">Open</span>
+                        {% elif trek.status == 'Started' %}
+                        <span class="badge bg-primary">Started</span>
+                        {% elif trek.status == 'Completed' %}
+                        <span class="badge bg-info">Completed</span>
+                        {% elif trek.status == 'Cancelled' %}
+                        <span class="badge bg-danger">Cancelled</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ trek.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-dark">{{ booking_count(trek.id) }}</span>
+                    </td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-trekkle-cta" data-bs-toggle="modal"
                             data-bs-target="#editModal{{ trek.id }}" title="Edit trek">
@@ -88,7 +106,7 @@
                 {% endfor %}
                 {% else %}
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-4">No treks found.</td>
+                    <td colspan="8" class="text-center text-muted py-4">No treks found.</td>
                 </tr>
                 {% endif %}
         </tbody>
@@ -148,8 +166,8 @@
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    {% for s in ['Open','Closed','Cancelled'] %}
-                                    <option value="{{ s }}" {% if trek.status==s %}selected{% endif %}>{{ s }}</option>
+                                    {% for s in ['Open','Started','Completed','Closed','Cancelled'] %}
+                                    <option value="{{ s }}" {% if trek.status== s %}selected{% endif %}>{{ s }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -208,6 +226,7 @@
                                 <th>Trek Name</th>
                                 <th>Booking Date</th>
                                 <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -236,11 +255,21 @@
                                     <span class="badge bg-secondary">{{ booking.status }}</span>
                                     {% endif %}
                                 </td>
+                                <td class="text-center">
+                                    {% if booking.status != 'Cancelled' %}
+                                    <form method="POST" action="{{ url_for('staff_bp.cancel_booking', booking_id=booking.id) }}"
+                                        >
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted small">—</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                             {% else %}
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No bookings found.</td>
+                                <td colspan="6" class="text-center text-muted py-4">No bookings found.</td>
                             </tr>
                             {% endif %}
                         </tbody>

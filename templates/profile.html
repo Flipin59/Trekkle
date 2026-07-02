@@ -1,0 +1,43 @@
+{%extends "base.html"%}
+{%block title%} Edit Profile{%endblock%}
+{%block content%}
+<div class="container py-4">
+    <h2 class="fw-semibold mb-4 px-3 text-center text-trekkle-primary">
+        Your Profile
+    </h2>
+    <div class="col d-flex flex-column justify-content-center align-items-center bg-trekkle-accent border border-white border-5 rounded-3 p-4 mx-2 my-2">
+        <h3 class="text-center mb-4 fw-bold text-dark">Update your Information</h3>
+        <form class="row g-3 px-4 mt-2 w-100" style="max-width: 600px;" method="post">
+            <div class="col-sm-12 col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" value="{{ user.username }}" disabled>
+                <div class="form-text">Username cannot be changed.</div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <label for="role" class="form-label">Role</label>
+                <input type="text" class="form-control" id="role" value="{{ user.role }}" disabled>
+            </div>
+            <div class="col-sm-12">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name }}" required>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="text" class="form-control" id="phone" name="phone" value="{{ user.phone or '' }}">
+            </div>
+            <div class="col-sm-12">
+                <label for="password" class="form-label">New Password (leave blank to keep current)</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••">
+            </div>
+            <div class="col-12 text-center my-3">
+                <button type="submit" class="btn btn-trekkle-primary btn-lg px-5">Save Changes</button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg ms-2">Back to Dashboard</a>
+            </div>
+        </form>
+    </div>
+</div>
+{%endblock%}
