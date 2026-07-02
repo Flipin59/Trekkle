@@ -220,9 +220,9 @@ def create_admin():
         )
         db.session.add(admin)
         db.session.commit()
-        print(f'[+] Admin user "{ADMIN_USERNAME}" created.')
+        print(f'Admin user "{ADMIN_USERNAME}" created.')
     else:
-        print('[*] Admin user already exists, skipping seed.')
+        print('Admin user already exists, skipping seed.')
 
 
 if __name__=="__main__":
