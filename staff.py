@@ -97,6 +97,9 @@ def edit_trek(trek_id):
     # if not staff_id:
     #     flash('A staff member must be assigned to the trek!')
     #     return redirect(url_for('admin_bp.admin_dashboard'))
+    # COPIED FROM ADMIN - NOT NEEDED HERE
+
+
 
     # verify this trek is assigned to the current staff
     assignment = StaffAssignment.query.filter_by(

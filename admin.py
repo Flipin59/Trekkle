@@ -130,7 +130,10 @@ def update_user_status(user_id, new_status):
         flash('Invalid status action!')
         return redirect(url_for('admin_bp.admin_dashboard'))
 
+    
     user_to_mod = User.query.get_or_404(user_id)
+    
+    # admin loackout prevention guardrail
     if user_to_mod.id == current_user.id:
         flash('Cannot modify your own admin status!')
         return redirect(url_for('admin_bp.admin_dashboard'))
@@ -170,6 +173,10 @@ def add_trek():
     if end_date < start_date:
         flash('End date cannot be before the start date!')
         return redirect(url_for('admin_bp.admin_dashboard'))
+
+    # lets assume trek can only be scheduled in advance/ on spot maybe like same day?
+    if start_date < date.today():
+        flash('Start date cannot be before today')
 
     if not staff_id:
         flash('A staff member must be assigned to the trek!')
@@ -221,6 +228,10 @@ def edit_trek(trek_id):
         flash('End date cannot be before the start date!')
         return redirect(url_for('admin_bp.admin_dashboard'))
 
+
+    if start_date < date.today():
+        flash('Start date cannot be before today')
+        
     if not staff_id:
         flash('A staff member must be assigned to the trek!')
         return redirect(url_for('admin_bp.admin_dashboard'))

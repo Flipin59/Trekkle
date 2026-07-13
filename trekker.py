@@ -43,6 +43,7 @@ def trekker_dashboard():
 
     # show open treks which aren't already booked by this user and those which are after today
     query = Treks.query.filter(
+        # yayy ternary operator in python lol
         ~Treks.id.in_(booked_trek_ids) if booked_trek_ids else True,
         Treks.start_date >= date.today(),
         Treks.status == 'Open'

@@ -10,13 +10,15 @@ from dotenv import load_dotenv
 load_dotenv()
 # from flask_sqlalchemy import SQLAlchemy
 
+
+# LLM GENERATED CODE STARTS HERE
 # admin credentials (loaded from .env)
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 ADMIN_EMAIL    = os.getenv('ADMIN_EMAIL')
 ADMIN_FULLNAME = os.getenv('ADMIN_FULLNAME')
 ADMIN_PHONE    = os.getenv('ADMIN_PHONE')
-
+# LLM GENERATED CODE ENDS HERE 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -41,9 +43,10 @@ login_manager.init_app(app)
 
 
 
-# role_required acts like a gatekeeper, checks role before
-# letting the controller call the actual function
 
+
+
+#LLM GENERATED CODE STARTS
 def role_required(role):
     def decorator(f):
         @wraps(f)
@@ -53,6 +56,9 @@ def role_required(role):
             return f(*args, **kwargs)
         return wrapped
     return decorator
+#LLM GENERATED CODE ENDS
+# role_required acts like a gatekeeper, checks role before
+# letting the controller call the actual function
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -142,6 +148,8 @@ def login():
 def dashboard():
 
     if current_user.role == 'Admin':
+
+        # Assuming admin cant be blacklisted
         return redirect(url_for('admin_bp.admin_dashboard'))
     
     elif current_user.role == 'Staff':
@@ -159,6 +167,7 @@ def dashboard():
             
             return redirect(url_for('trekker_bp.trekker_dashboard'))
        elif current_user.status == 'pending':
+        #    never comes here ig but for safety why not
            flash("Account activation pending try again in a while!!")
            return redirect(url_for('login', user = current_user))
        else:
@@ -204,9 +213,9 @@ def profile():
 
 
 
-
+# LLM GENERATED CODE STARTS HERE
+# admin seeding - Generate admin user from ENV variables
 def create_admin():
-    """seed the default admin user if it doesn't already exist."""
     existing = User.query.filter_by(username=ADMIN_USERNAME).first()
     if not existing:
         admin = User(
@@ -224,6 +233,7 @@ def create_admin():
     else:
         print('Admin user already exists, skipping seed.')
 
+# LLM GENERATED CODE ENDS HERE
 
 if __name__=="__main__":
     with app.app_context():

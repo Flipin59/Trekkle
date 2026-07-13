@@ -13,10 +13,10 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(150), nullable=False)
     phone = db.Column(db.String(20))
     
-    # Admin, Trekker, or Staff
+    # follow convention: Admin, Trekker, or Staff
     role = db.Column(db.String(20), nullable=False, default="trekker")
     
-    # active, pending, or blacklisted
+    # follow convention: active, pending, or blacklisted
     status = db.Column(db.String(20), nullable=False, default="pending")
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -48,6 +48,6 @@ class Booking(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     trek_id = db.Column(db.Integer, db.ForeignKey("treks.id", ondelete="CASCADE"), nullable=False)
     booking_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    # follow convention for booking status: booked, cancelled, completed
+    # follow convention for booking status: Booked, Cancelled, Completed
     status = db.Column(db.String(20), nullable=False, default="Booked")
 
