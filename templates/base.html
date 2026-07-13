@@ -7,8 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <title>{% block title %}{% endblock %}</title>
-    
-    
+
+
     <!--LLM GENERATED CODE STARTS HERE-->
     <style>
         :root {
@@ -122,7 +122,7 @@
                 <div class="d-flex align-items-center ms-auto gap-2">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Home</a>
+                            <a class="nav-link active" aria-current="page" href="{{url_for('home')}}">Home</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{url_for('home')}}#about">Who we are</a>
